@@ -1,0 +1,46 @@
+# Node.js dependencies
+/node_modules/
+
+# Build outputs
+/dist/
+/build/
+/out/
+
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# Environment variables
+.env
+
+# Temporary files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# OS generated files
+*.swp
+*.tmp
+*.bak
+
+# Coverage directory
+/coverage/
+
+# Yarn files
+yarn-error.log
+yarn-debug.log*
+
+# Test files
+/tests/**/*.js
+/tests/**/*.jsx
+
+# Other
+*.tgz
+
+/nfts/

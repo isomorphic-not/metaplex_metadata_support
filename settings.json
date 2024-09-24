@@ -1,0 +1,5 @@
+{
+    "editor.formatOnSave": true,
+    "eslint.alwaysShowRuleFailuresAsWarnings": true,
+    "prettier.requireConfig": true
+}
