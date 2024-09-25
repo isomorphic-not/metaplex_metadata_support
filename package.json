@@ -2,10 +2,23 @@
   "name": "javascript",
   "version": "1.0.0",
   "description": "",
-  "main": "run_js.js",
+  "main": "src/index.js",
+  "bin": "src/index.js",
   "type": "module",
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "start": "node src/index.js",
+    "build": "pkg ."
+  },
+  "pkg": {
+    "targets": [
+      "node16-linux-x64",
+      "node16-macos-x64",
+      "node16-win-x64"
+    ],
+    "scripts": "src/**/*.js",
+    "executable": "tokemon",
+    "output": "dist/tokemon"
   },
   "keywords": [],
   "author": "",
@@ -13,7 +26,8 @@
   "dependencies": {
     "@metaplex-foundation/js": "^0.20.1",
     "@solana/web3.js": "^1.95.3",
-    "dotenv": "^16.4.5"
+    "dotenv": "^16.4.5",
+    "yargs": "^17.7.2"
   },
   "devDependencies": {
     "@eslint/js": "^9.11.0",

@@ -1,42 +1,37 @@
-// Import the default export from the CommonJS module
-import runJs from "../src/run_js.cjs";
+#!/usr/bin/env node
 
-const { getMetadataFromHashfile, updateNftMetadata } = runJs;
-import { createInterface } from "readline";
+import { handleHashfile, updateImmutableNftMetadata, saveMetadataToDir, setupMetaplex } from "./metadata_utils.js";
+import yargs from "yargs";
+import { hideBin } from "yargs/helpers";
 
-const rl = createInterface({
-  input: process.stdin,
-  output: process.stdout,
-});
+const argv = yargs(hideBin(process.argv))
+  .option("action", {
+    description: "Action to perform (updateImmutableNftMetadata, saveMetadataToDir)",
+    type: "string",
+    choices: ["metadata-update-immutable", "metadata-save"], 
+    demandOption: true,
+  })
+  .option("file", {
+    description: "file containing valid JSON formatted list of nft hashes.",
+    type: "string",
+    demandOption: true,
+  })
+  .help()
+  .argv;
+
+
+let chosenCallback;
+if (argv.action === "metadata-update-immutable") {
+  chosenCallback = updateImmutableNftMetadata;
+} else if (argv.action === "metadata-save") {
+  chosenCallback = saveMetadataToDir;
+}
 
 async function main() {
-  rl.question(
-    "Enter '1' to process hashes, '2' to update metadata, or 'exit' to quit: ",
-    async (answer) => {
-      try {
-        if (answer === "1") {
-          console.log("Starting NFT processing...");
-          await getMetadataFromHashfile("hash_list.txt");
-          console.log("NFT processing completed.");
-          rl.close();
-        } else if (answer === "2") {
-          console.log(`Updating metadata for mint address...`);
-          await updateNftMetadata();
-          console.log("Metadata update completed.");
-          rl.close();
-        } else if (answer.toLowerCase() === "exit") {
-          console.log("Exiting the application.");
-          rl.close();
-        } else {
-          console.log("Invalid input. Please enter '1', '2', or 'exit'.");
-          main();
-        }
-      } catch (error) {
-        console.error("An error occurred:", error);
-        main();
-      }
-    },
-  );
+  const hashFile = argv.file; 
+  console.log(`Processing file: ${hashFile} with action: ${argv.action}`);
+  const { metaplex } = setupMetaplex(); 
+  await handleHashfile(metaplex, hashFile, chosenCallback);
 }
 
 main();
