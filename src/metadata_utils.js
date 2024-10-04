@@ -55,19 +55,15 @@ async function getHashListFromFile(hashFile) {
   return jsonData;
 }
 
-async function updateToImmutableMetadata(nft, metaplex, nftDir) {
+async function updateToImmutableMetadata(nft, metaplex, {nftDir, nftCreatorAddress, marketPlaceApiUrl}) {
   const mintAddress = nft.address.toBase58(); 
-  const url = 'https://api-mainnet.magiceden.dev/v2/tokens/' + mintAddress;
 
-  const res = await axios.get(url, {
+  const res = await axios.get(marketPlaceApiUrl + mintAddress, {
     headers: { accept: 'application/json' }
   });
 
-  const owner = res.data.owner;
-  const targetOwner = '7FnLuV5TWGmgx5ZWdUtmCqtwpwSaXRaXBVgxa2xDPBAK';
-
-  if (owner === targetOwner) {
-    console.log(`Owner wallet: ${owner}\nCreator Wallet: ${targetOwner}\nCreator is the owner of this nft, no attempt to update. Continuing...\n`);
+  if (res.data.owner === nftCreatorAddress) {
+    console.log(`Owner wallet: ${res.data.owner}\nCreator Wallet: ${nftCreatorAddress}\nCreator is the owner of this nft, no attempt to update. Continuing...\n`);
     return;
   } 
 
@@ -106,10 +102,10 @@ async function updateToImmutableMetadata(nft, metaplex, nftDir) {
   console.log(`${mintAddress} update complete!\n`);
 }
 
-async function updateToPlaceholderMetadata(nft, metaplex, _) {
+async function updateToPlaceholderMetadata(nft, metaplex, {metadataName, metadataUri}) {
   const jsonData = {
-    name: 'TOKEMON BASED SET PACK', 
-    uri: 'https://arweave.net/M3EGrRVqiJpXMn7TiNcNYr2Vz9-6h1Y-2QWHOJwYKCY'
+    name: metadataName, 
+    uri: metadataUri
   };
   await metaplex.nfts().update({
     nftOrSft: nft,
@@ -118,7 +114,7 @@ async function updateToPlaceholderMetadata(nft, metaplex, _) {
   console.log('NFT updated Placeholder successfully');
 }
 
-function saveMetadataToDir(nft, _, nftDir) {
+function saveMetadataToDir(nft, _, { nftDir }) {
   const nft_dir = path.join(process.cwd(), nftDir);
   if (!fs.existsSync(nft_dir)) {
     fs.mkdirSync(nft_dir);
