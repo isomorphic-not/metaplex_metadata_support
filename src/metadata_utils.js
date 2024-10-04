@@ -3,6 +3,7 @@ import { Metaplex, keypairIdentity } from '@metaplex-foundation/js';
 import fs from 'fs';
 import dotenv from 'dotenv';
 import path from 'path';
+import axios from'axios';
 
 dotenv.config();
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -55,46 +56,14 @@ async function getHashListFromFile(hashFile) {
 }
 
 async function updateToImmutableMetadata(nft, metaplex, nftDir) {
-  const connection = new Connection(
-    clusterApiUrl(process.env.RPC_ENDPOINT),
-    'confirmed',
-    { timeout: 60000 }
-  );
   const mintAddress = nft.address.toBase58(); 
-  console.log(`Handling NFT mint address ${mintAddress}...`);
+  const url = 'https://api-mainnet.magiceden.dev/v2/tokens/' + mintAddress;
 
-  const mintAddressObj = new PublicKey(mintAddress);
+  const res = await axios.get(url, {
+    headers: { accept: 'application/json' }
+  });
 
-  let largestAccounts;
-  console.log('Getting token accounts...');
-  while (true) {
-    try {
-      largestAccounts = await connection.getTokenLargestAccounts(
-        mintAddressObj,
-      );
-      break;
-    } catch (error) {
-      console.log('.');
-      await sleep(1500);
-    }
-  }
-  
-  let largestAccountInfo;
-  console.log('Parsing accounts...');
-  while (true) {
-    try {
-      console.error = () => {};
-      largestAccountInfo = await connection.getParsedAccountInfo(
-        largestAccounts.value[0].address,
-      );
-      break;
-    } catch (error) {
-      console.log('.');
-      await sleep(1500);
-    }
-  }
-
-  const owner = largestAccountInfo?.value?.data?.parsed.info.owner;
+  const owner = res.data.owner;
   const targetOwner = '7FnLuV5TWGmgx5ZWdUtmCqtwpwSaXRaXBVgxa2xDPBAK';
 
   if (owner === targetOwner) {
@@ -134,7 +103,7 @@ async function updateToImmutableMetadata(nft, metaplex, nftDir) {
       }
     } 
   }
-  console.log('complete!\n');
+  console.log(`${mintAddress} update complete!\n`);
 }
 
 async function updateToPlaceholderMetadata(nft, metaplex, _) {
